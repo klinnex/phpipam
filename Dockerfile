@@ -32,7 +32,7 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
 	echo ". /etc/environment" >> /etc/apache2/envvars && \
 	a2enmod rewrite
 
-ENV PHPIPAM_SOURCE "https://github.com/phpipam/phpipam/archive/" \
+ENV PHPIPAM_SOURCE "https://github.com/phpipam/phpipam/archive" \
     PHPIPAM_VERSION "1.3" \
     MYSQL_HOST "mysql" \
     MYSQL_USER "phpipam" \
