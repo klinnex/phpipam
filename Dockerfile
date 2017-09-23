@@ -32,18 +32,18 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
 	echo ". /etc/environment" >> /etc/apache2/envvars && \
 	a2enmod rewrite
 
-ENV PHPIPAM_SOURCE "https://github.com/phpipam/phpipam/archive" \
-    PHPIPAM_VERSION "1.3" \
-    MYSQL_HOST "mysql" \
-    MYSQL_USER "phpipam" \
-    MYSQL_PASSWORD "phpipamadmin" \
-    MYSQL_DB "phpipam" \
-    MYSQL_PORT "3306" \
-    SSL "false" \
-    SSL_KEY "/path/to/cert.key" \
-    SSL_CERT "/path/to/cert.crt" \
-    SSL_CA "/path/to/ca.crt" \
-    SSL_CAPATH "/path/to/ca_certs" \
+ENV PHPIPAM_SOURCE "https://github.com/phpipam/phpipam/archive"\
+    PHPIPAM_VERSION "1.3"\
+    MYSQL_HOST "mysql"\
+    MYSQL_USER "phpipam"\
+    MYSQL_PASSWORD "phpipamadmin"\
+    MYSQL_DB "phpipam"\
+    MYSQL_PORT "3306"\
+    SSL "false"\
+    SSL_KEY "/path/to/cert.key"\
+    SSL_CERT "/path/to/cert.crt"\
+    SSL_CA "/path/to/ca.crt"\
+    SSL_CAPATH "/path/to/ca_certs"\
     SSL_CIPHER "DHE-RSA-AES256-SHA:AES128-SHA"
 
 COPY php.ini /usr/local/etc/php/
