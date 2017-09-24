@@ -60,20 +60,23 @@ For multi-host containers, expose ports, run etcd or consul to make service disc
 
 You can create an all-in-one YAML deployment descriptor with Docker compose, like this : 
 
-```yaml
-ipam:
-  image: pierrecdn/phpipam
-  ports:
-   - "80:80"
-  links:
-   - phpipam-mysql
-phpipam-mysql:
-  image: mysql:5.6
-  environment: 
-   - MYSQL_ROOT_PASSWORD=my-secret-pw
-  volumes:
-   - /my_dir/phpipam:/var/lib/mysql
-```
+version: '2'
+services:
+  mysql:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=Password-Mysql
+    restart: always
+    volumes:
+      - /data/mysql:/var/lib/mysql
+  ipam:
+    depends_on:
+      - mysql
+    image: klinnex/phpipam
+    environment:
+      - MYSQL_ENV_MYSQL_ROOT_PASSWORD=Password-Mysql
+    ports:
+      - "80:80"
 
 And next :
 
