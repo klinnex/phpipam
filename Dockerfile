@@ -1,74 +1,46 @@
 FROM php:5.6-apache
 MAINTAINER Klinnex
 
+ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/archive/
+ENV PHPIPAM_VERSION 1.3
+ENV WEB_REPO /var/www/html
+
 # Install required deb packages
-RUN apt-get update && \ 
-	apt-get install -y\
-	git\
-	php-pear\
-	php5-curl\
-	php5-mysql\
-	php5-json\
-	php5-gmp\
-	php5-mcrypt\
-	php5-ldap\
-	libpng-dev\
-	libgmp-dev\
-	libmcrypt-dev && \
-	rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get -y upgrade && \
+    apt-get install -y php-pear php5-curl php5-mysql php5-json php5-gmp php5-mcrypt php5-ldap php5-gd php-net-socket libgmp-dev libmcrypt-dev libpng12-dev libfreetype6-dev libjpeg-dev libpng-dev libldap2-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Configure apache and required PHP modules 
+# Configure apache and required PHP modules
 RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
-	docker-php-ext-install mysqli && \
-	docker-php-ext-install pdo_mysql && \
-	docker-php-ext-install pcntl && \
-        docker-php-ext-install gettext && \ 
-	docker-php-ext-install sockets && \
-	docker-php-ext-install gd && \
-	ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h && \
-	docker-php-ext-configure gmp --with-gmp=/usr/include/x86_64-linux-gnu && \
-	docker-php-ext-install gmp && \
-        docker-php-ext-install mcrypt && \
-	echo ". /etc/environment" >> /etc/apache2/envvars && \
-	a2enmod rewrite
-
-ENV PHPIPAM_SOURCE "https://github.com/phpipam/phpipam/archive"
-ENV PHPIPAM_VERSION "1.3"
-ENV MYSQL_HOST "mysql"
-ENV MYSQL_USER "phpipam"
-ENV MYSQL_PASSWORD "phpipamadmin"
-ENV MYSQL_DB "phpipam"
-ENV MYSQL_PORT "3306"
-ENV SSL "false"
-ENV SSL_KEY "/path/to/cert.key"
-ENV SSL_CERT "/path/to/cert.crt"
-ENV SSL_CA "/path/to/ca.crt"
-ENV SSL_CAPATH "/path/to/ca_certs"
-ENV SSL_CIPHER "DHE-RSA-AES256-SHA:AES128-SHA"
+    docker-php-ext-install mysqli && \
+    docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/freetype2 --with-png-dir=/usr/include --with-jpeg-dir=/usr/include && \
+    docker-php-ext-install gd && \
+    docker-php-ext-install sockets && \
+    docker-php-ext-install pdo_mysql && \
+    docker-php-ext-install gettext && \
+    ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h && \
+    docker-php-ext-configure gmp --with-gmp=/usr/include/x86_64-linux-gnu && \
+    docker-php-ext-install gmp && \
+    docker-php-ext-install mcrypt && \
+    docker-php-ext-install pcntl && \
+    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu && \
+    docker-php-ext-install ldap && \
+    echo ". /etc/environment" >> /etc/apache2/envvars && \
+    a2enmod rewrite
 
 COPY php.ini /usr/local/etc/php/
 
-
 # copy phpipam sources to web dir
-RUN echo "$PHPIPAM_SOURCE"/"$PHPIPAM_VERSION".tar.gz
-ADD "$PHPIPAM_SOURCE"/"$PHPIPAM_VERSION".tar.gz /tmp/
-RUN tar -xzf /tmp/$PHPIPAM_VERSION.tar.gz -C /var/www/html/ --strip-components=1 && \
-    cp /var/www/html/config.dist.php /var/www/html/config.php
+ADD ${PHPIPAM_SOURCE}/${PHPIPAM_VERSION}.tar.gz /tmp/
+RUN tar -xzf /tmp/${PHPIPAM_VERSION}.tar.gz -C ${WEB_REPO}/ --strip-components=1
 
 # Use system environment variables into config.php
-RUN sed -i \ 
-	-e "s/\['host'\] = 'localhost'/\['host'\] = \"$MYSQL_HOST"/" \ 
-        -e "s/\['user'\] = 'phpipam'/\['user'\] = \"$MYSQL_USER"/" \ 
-        -e "s/\['pass'\] = 'phpipamadmin'/\['pass'\] = \"$MYSQL_PASSWORD"/" \ 
-        -e "s/\['name'\] = 'phpipam'/\['name'\] = \"$MYSQL_DB"/" \ 
-        -e "s/\['port'\] = 3306/\['port'\] = \"$MYSQL_PORT"/" \ 
-        -e "s/\['ssl'\] *= false/\['ssl'\] = $SSL" \ 
-#        -e "s/\['ssl_key'\] *= \"\/path\/to\/cert.key\"/['ssl_key'\] = $SSL_KEY/" \ 
-#        -e "s/\['ssl_cert'\] *= \"\/path\/to\/cert.crt\"/['ssl_cert'\] = $SSL_CERT/" \ 
-#        -e "s/\['ssl_ca'\] *= \"\/path\/to\/ca.crt\"/['ssl_ca'\] = $SSL_CA/" \ 
-#        -e "s/\['ssl_capath'\] *= \"\/path\/to\/ca_certs\"/['ssl_capath'\] = $SSL_CAPATH/" \ 
-#        -e "s/\['ssl_cipher'\] *= \"DHE-RSA-AES256-SHA:AES128-SHA\"/['ssl_cipher'\] = $SSL_CIPHER/" \
-        /var/www/html/config.php
-
+RUN cp ${WEB_REPO}/config.dist.php ${WEB_REPO}/config.php && \
+    sed -i -e "s/\['host'\] = 'localhost'/\['host'\] = 'mysql'/" \
+    -e "s/\['user'\] = 'phpipam'/\['user'\] = 'root'/" \
+    -e "s/\['pass'\] = 'phpipamadmin'/\['pass'\] = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\")/" \
+    ${WEB_REPO}/config.php && \
+    sed -i -e "s/\['port'\] = 3306;/\['port'\] = 3306;\n\n\$password_file = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\");\nif(file_exists(\$password_file))\n\$db\['pass'\] = preg_replace(\"\/\\\\s+\/\", \"\", file_get_contents(\$password_file));/" \
+    ${WEB_REPO}/config.php
 
 EXPOSE 80
