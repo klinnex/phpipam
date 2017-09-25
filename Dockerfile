@@ -7,7 +7,23 @@ ENV WEB_REPO /var/www/html
 
 # Install required deb packages
 RUN apt-get update && apt-get -y upgrade && \
-    apt-get install -y php-pear php5-curl php5-mysql php5-json php5-gmp php5-mcrypt php5-ldap php5-gd php-net-socket libgmp-dev libmcrypt-dev libpng12-dev libfreetype6-dev libjpeg-dev libpng-dev libldap2-dev && \
+    apt-get install -y\
+    php-pear\
+    php5-curl\
+    php5-mysql\
+    php5-json\
+    php5-gmp\
+    php5-mcrypt\
+    php5-ldap\
+    php5-gd\
+    php-net-socket\
+    libgmp-dev\
+    libmcrypt-dev\
+    libpng12-dev\
+    libfreetype6-dev\
+    libjpeg-dev\
+    libpng-dev\
+    libldap2-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Configure apache and required PHP modules
