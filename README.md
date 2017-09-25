@@ -15,15 +15,15 @@ Learn more on [phpIPAM homepage](http://phpipam.net)
 Run a MySQL database, dedicated to phpipam
 
 ```bash
-$ docker run --name phpipam-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -v /my_dir/phpipam:/var/lib/mysql -d mysql:5.6
+$ docker run --name mysql-network -e MYSQL_ROOT_PASSWORD=my-secret-pw -v /docker/mysql-network:/var/lib/mysql -d mysql:5.6
 ```
 
-Here, we store data on the host system under `/my_dir/phpipam` and use a specific root password. 
+Here, we store data on the host system under `/docker/mysql-network` and use a specific root password. 
 
 ### Phpipam 
 
 ```bash
-$ docker run -ti -d -p 80:80 --name ipam --link phpipam-mysql:mysql klinnex/phpipam
+$ docker run -ti -d -p 80:80 --name ipam --link mysql-network:mysql klinnex/phpipam
 ```
 
 We are linking the two containers and expose the HTTP port. 
@@ -62,21 +62,25 @@ You can create an all-in-one YAML deployment descriptor with Docker compose, lik
 
 version: '2'
 services:
-  mysql:
+  mysql-network:
     image: mysql:5.6
+    container_name: mysql-network
     environment:
-      - MYSQL_ROOT_PASSWORD=Password-Mysql
+      - MYSQL_ROOT_PASSWORD=P@ssword
     restart: always
     volumes:
       - /data/mysql:/var/lib/mysql
   ipam:
+    container_name: phpipam
     depends_on:
-      - mysql
+      - mysql-network
     image: klinnex/phpipam
     environment:
-      - MYSQL_ENV_MYSQL_ROOT_PASSWORD=Password-Mysql
+      - MYSQL_ENV_MYSQL_ROOT_PASSWORD=P@ssword
     ports:
       - "80:80"
+    links:
+      - "mysql-network:mysql"
 
 And next :
 
