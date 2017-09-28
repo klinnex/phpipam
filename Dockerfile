@@ -2,7 +2,7 @@ FROM php:5.6-apache
 MAINTAINER Klinnex
 
 ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/archive/
-ENV PHPIPAM_VERSION 1.3
+ENV PHPIPAM_VERSION 1.2
 ENV WEB_REPO /var/www/html
 
 # Install required deb packages
