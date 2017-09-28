@@ -9,6 +9,7 @@ ENV WEB_REPO /var/www/html
 RUN apt-get update && \
     apt-get install -y\
     php-pear\
+    nmap\
     php5-curl\
     php5-mysql\
     php5-json\
