@@ -52,6 +52,7 @@ COPY php.ini /usr/local/etc/php/
 ADD ${PHPIPAM_SOURCE}/${PHPIPAM_VERSION}.tar.gz /tmp/
 RUN tar -xzf /tmp/${PHPIPAM_VERSION}.tar.gz -C ${WEB_REPO}/ --strip-components=1 && \
 # Use system environment variables into config.php
+# use MYSQL ENV MYSQL receive on docker-compose
     cp ${WEB_REPO}/config.dist.php ${WEB_REPO}/config.php && \
     sed -i -e "s/\['host'\] = 'localhost'/\['host'\] = 'mysql'/" \
     -e "s/\['user'\] = 'phpipam'/\['user'\] = 'root'/" \
