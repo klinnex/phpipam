@@ -1,13 +1,14 @@
 FROM php:5.6-apache
 MAINTAINER Klinnex
 
-ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/archive/
+#ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/archive/
 ENV PHPIPAM_VERSION 1.3
 ENV WEB_REPO /var/www/html
 
 # Install required deb packages
 RUN apt-get update && \
     apt-get install -y\
+    git\
     php-pear\
     nmap\
     php5-curl\
@@ -48,9 +49,10 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
 COPY php.ini /usr/local/etc/php/
 
 # copy phpipam sources to web dir
-
-ADD ${PHPIPAM_SOURCE}/${PHPIPAM_VERSION}.tar.gz /tmp/
-RUN tar -xzf /tmp/${PHPIPAM_VERSION}.tar.gz -C ${WEB_REPO}/ --strip-components=1 && \
+RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
+    cd ${WEB_REPO} &&\
+    git checkout ${PHPIPAM_VERSION} &&\
+    git submodule update --init --recursive &&\
 # Use system environment variables into config.php
 # use MYSQL ENV MYSQL receive on docker-compose
     cp ${WEB_REPO}/config.dist.php ${WEB_REPO}/config.php && \
