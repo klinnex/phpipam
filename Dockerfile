@@ -49,7 +49,7 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
 COPY php.ini /usr/local/etc/php/
 
 # copy phpipam sources to web dir
-RUN GIT clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
+RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     cd ${WEB_REPO} &&\
     git checkout ${PHPIPAM_VERSION} &&\
     git submodule update --init --recursive &&\
