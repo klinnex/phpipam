@@ -5,9 +5,14 @@ MAINTAINER Klinnex
 ENV PHPIPAM_VERSION 1.3
 ENV WEB_REPO /var/www/html
 
+# Install apt-utils before other packages
+RUN apt-get update && \
+    apt-get install -y apt-utils
+    
 # Install required deb packages
 RUN apt-get update && \
     apt-get install -y\
+    dialog\
     git\
     php-pear\
     nmap\
@@ -28,6 +33,11 @@ RUN apt-get update && \
     libldap2-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Install ssl-cert for autogenerate ssl certificates
+
+RUN apt-get update && \
+        apt-get install -y ssl-cert
+
 # Configure apache and required PHP modules
 RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-install mysqli && \
@@ -44,9 +54,11 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu && \
     docker-php-ext-install ldap && \
     echo ". /etc/environment" >> /etc/apache2/envvars && \
-    a2enmod rewrite
-
-COPY php.ini /usr/local/etc/php/
+    a2enmod rewrite && \
+		a2enmod ssl && \
+    a2ensite default-ssl
+        
+#COPY php.ini /usr/local/etc/php/
 
 # copy phpipam sources to web dir
 RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
@@ -63,4 +75,4 @@ RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     sed -i -e "s/\['port'\] = 3306;/\['port'\] = 3306;\n\n\$password_file = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\");\nif(file_exists(\$password_file))\n\$db\['pass'\] = preg_replace(\"\/\\\\s+\/\", \"\", file_get_contents(\$password_file));/" \
     ${WEB_REPO}/config.php
 
-EXPOSE 80
+EXPOSE 443
