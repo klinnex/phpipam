@@ -73,7 +73,9 @@ RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     -e "s/\['pass'\] = 'phpipamadmin'/\['pass'\] = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\")/" \
     ${WEB_REPO}/config.php && \
     sed -i -e "s/\['port'\] = 3306;/\['port'\] = 3306;\n\n\$password_file = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\");\nif(file_exists(\$password_file))\n\$db\['pass'\] = preg_replace(\"\/\\\\s+\/\", \"\", file_get_contents(\$password_file));/" \
-    ${WEB_REPO}/config.php && \
-    echo "date_default_timezone_set(getenv('TIMEZONE'));">> ${WEB_REPO}/config.php
+    ${WEB_REPO}/config.php
+
+#Debug Time zone
+    RUN echo "date_default_timezone_set(getenv('TIMEZONE'));">> ${WEB_REPO}/config.php
 
 EXPOSE 443
