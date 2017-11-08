@@ -1,1 +1,8 @@
 version: '2'
+services:
+  phpipam:
+    image: klinnex/phpipam
+    environment: []
+  mysql:
+    image: mysql
+    ports: []
