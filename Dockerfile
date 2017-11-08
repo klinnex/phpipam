@@ -1,14 +1,11 @@
 FROM php:5.6-apache
 MAINTAINER Klinnex
-
 #ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/archive/
 ENV PHPIPAM_VERSION 1.3
 ENV WEB_REPO /var/www/html
-
 # Install apt-utils before other packages
 RUN apt-get update && \
     apt-get install -y apt-utils
-    
 # Install required deb packages
 RUN apt-get update && \
     apt-get install -y\
@@ -32,12 +29,9 @@ RUN apt-get update && \
     libpng-dev\
     libldap2-dev && \
     rm -rf /var/lib/apt/lists/*
-
 # Install ssl-cert for autogenerate ssl certificates
-
 RUN apt-get update && \
         apt-get install -y ssl-cert
-
 # Configure apache and required PHP modules
 RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-install mysqli && \
@@ -57,9 +51,7 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     a2enmod rewrite && \
 		a2enmod ssl && \
     a2ensite default-ssl
-        
 #COPY php.ini /usr/local/etc/php/
-
 # copy phpipam sources to web dir
 RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     cd ${WEB_REPO} &&\
@@ -70,12 +62,10 @@ RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     cp ${WEB_REPO}/config.dist.php ${WEB_REPO}/config.php && \
     sed -i -e "s/\['host'\] = 'localhost'/\['host'\] = 'mysql'/" \
     -e "s/\['user'\] = 'phpipam'/\['user'\] = 'root'/" \
-    -e "s/\['pass'\] = 'phpipamadmin'/\['pass'\] = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\")/" \
-    ${WEB_REPO}/config.php && \
-    sed -i -e "s/\['port'\] = 3306;/\['port'\] = 3306;\n\n\$password_file = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\");\nif(file_exists(\$password_file))\n\$db\['pass'\] = preg_replace(\"\/\\\\s+\/\", \"\", file_get_contents(\$password_file));/" \
+    -e "s/\['pass'\] = 'phpipamadmin'/\['pass'\] = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\")/" \    
     ${WEB_REPO}/config.php
-
+    #sed -i -e "s/\['port'\] = 3306;/\['port'\] = 3306;\n\n\$password_file = getenv(\"MYSQL_ENV_MYSQL_ROOT_PASSWORD\");\nif(file_exists(\$password_file))\n\$db\['pass'\] = preg_replace(\"\/\\\\s+\/\", \"\", file_get_contents(\$password_file));/" \
+    #${WEB_REPO}/config.php
 #Debug Time zone
     RUN echo "date_default_timezone_set(getenv('TIMEZONE'));">> ${WEB_REPO}/config.php
-
 EXPOSE 443
