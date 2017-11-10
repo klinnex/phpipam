@@ -68,4 +68,4 @@ RUN git clone https://github.com/phpipam/phpipam.git ${WEB_REPO} &&\
     #${WEB_REPO}/config.php
 #Debug Time zone
     RUN echo "date_default_timezone_set(getenv('TIMEZONE'));">> ${WEB_REPO}/config.php
-EXPOSE 443
+EXPOSE 443 80
