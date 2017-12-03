@@ -76,7 +76,7 @@ services:
       - mysql-network
     image: klinnex/phpipam
     environment:
-      - MYSQL_ENV_MYSQL_ROOT_PASSWORD=P@ssword
+      - MYSQL_ROOT_PASSWORD=P@ssword
     ports:
       - "80:80"
     links:
