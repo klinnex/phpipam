@@ -4,7 +4,8 @@ MAINTAINER Klinnex
 ENV PHPIPAM_VERSION 1.3
 ENV WEB_REPO /var/www/html
 # Install apt-utils before other packages
-RUN apt-get update && \
+RUN  rm /etc/apt/preferences.d/no-debian-php &&\
+    apt-get update && \
     apt-get install -y apt-utils
 # Install required deb packages
 RUN apt-get update && \
